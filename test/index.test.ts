@@ -1,29 +1,55 @@
 import test from 'ava'
+import {
+  Entity,
+  Transform,
+  Vector3,
+  BoxShape,
+  Quaternion,
+  GLTFShape,
+  SphereShape
+} from 'decentraland-ecs'
 
-import { writeEntity } from '../src'
-import { Entity, ComponentType, Component } from '../src/types'
-import { Vector3, Quaternion, Transform } from '../src/modifiers'
+import { SceneWriter } from '../src'
 
-test('Unit - writeEntity(cube) - should output TS of cube', t => {
-  const cube: Entity = {
-    name: 'cube',
-    components: []
-  }
+test('Unit - write entity cube - should output TS of cube', t => {
+  const sceneWriter = new SceneWriter()
+  sceneWriter.addEntity('cube', new Entity())
+  sceneWriter.addComponent('cube', new BoxShape())
+  sceneWriter.addComponent(
+    'cube',
+    new Transform({ position: new Vector3(5, 0, 5), rotation: new Quaternion(0, 0, 1, 0) })
+  )
+  const code = sceneWriter.emitCode()
 
-  const boxShape: Component<ComponentType.BoxShape> = { type: ComponentType.BoxShape }
-  const transform: Component<ComponentType.Transform> = {
-    type: ComponentType.Transform,
-    data: new Transform({
-      position: new Vector3({ x: 5, y: 0, z: 5 }),
-      rotation: new Quaternion({ x: 0, z: 1, y: 0, w: 0 })
-    })
-  }
-
-  cube.components.push(boxShape, transform)
-
-  const code = writeEntity(cube)
   t.is(
     code,
-    'const cube = new Entity()\ncube.set(new BoxShape())\ncube.set(new Transform({ position: new Vector3(5, 0, 5), rotation: new Quaternion(0, 0, 1, 0) }))\n'
+    'const cube = new Entity()\ncube.set(new BoxShape())\ncube.set(new Transform({ position: new Vector3(5, 0, 5), rotation: new Quaternion(0, 0, 1, 0), scale: new Vector3(1, 1, 1) }))\n\n'
+  )
+})
+
+test('Unit - write entity GLTF - should output TS of cube', t => {
+  const sceneWriter = new SceneWriter()
+  sceneWriter.addEntity('skeleton', new Entity())
+  sceneWriter.addComponent('skeleton', new GLTFShape('./asd.gltf'))
+  sceneWriter.addComponent('skeleton', new Transform({ rotation: new Quaternion(0, 2, 1, 0) }))
+  const code = sceneWriter.emitCode()
+
+  t.is(
+    code,
+    `const skeleton = new Entity()\nskeleton.set(new GLTFShape('./asd.gltf'))\nskeleton.set(new Transform({ position: new Vector3(0, 0, 0), rotation: new Quaternion(0, 2, 1, 0), scale: new Vector3(1, 1, 1) }))\n\n`
+  )
+})
+
+test('Unit - write 2 entities - should output TS of cube', t => {
+  const sceneWriter = new SceneWriter()
+  sceneWriter.addEntity('sphere', new Entity())
+  sceneWriter.addComponent('sphere', new SphereShape())
+  sceneWriter.addEntity('cube', new Entity())
+  sceneWriter.addComponent('cube', new BoxShape())
+  const code = sceneWriter.emitCode()
+
+  t.is(
+    code,
+    `const sphere = new Entity()\nsphere.set(new SphereShape())\n\nconst cube = new Entity()\ncube.set(new BoxShape())\n\n`
   )
 })
