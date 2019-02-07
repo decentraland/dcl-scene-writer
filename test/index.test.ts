@@ -9,7 +9,7 @@ import {
   SphereShape
 } from 'decentraland-ecs'
 
-import { SceneWriter } from '../src'
+import SceneWriter from '../src'
 
 test('Unit - write entity cube - should output TS of cube', t => {
   const sceneWriter = new SceneWriter()

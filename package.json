@@ -3,8 +3,15 @@
   "version": "0.0.0",
   "description": "Programmatically write DCL scenes",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "ncc build src/index.ts -o dist --minify"
+    "build": "ncc build src/index.ts -o dist --minify",
+    "watch": "npm run build -- --watch",
+    "test": "ava",
+    "precommit": "lint-staged"
   },
   "lint-staged": {
     "linters": {

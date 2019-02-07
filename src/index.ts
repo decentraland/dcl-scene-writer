@@ -6,7 +6,7 @@ type Component = {
   entityName?: string
 }
 
-export class SceneWriter {
+export default class SceneWriter {
   private entities: Map<string, DCL.Entity> = new Map<string, DCL.Entity>()
   private components: Component[] = []
 
