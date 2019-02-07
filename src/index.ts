@@ -11,6 +11,10 @@ export class SceneWriter {
   private components: Component[] = []
 
   addEntity(name: string, entity: DCL.Entity) {
+    if (this.entities.has(name)) {
+      throw new Error(`There is already an entity with name "${name}"`)
+    }
+
     this.entities.set(name, entity)
   }
 

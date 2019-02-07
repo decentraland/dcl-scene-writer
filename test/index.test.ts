@@ -53,3 +53,14 @@ test('Unit - write 2 entities - should output TS of cube', t => {
     `const sphere = new Entity()\nsphere.set(new SphereShape())\n\nconst cube = new Entity()\ncube.set(new BoxShape())\n\n`
   )
 })
+
+test('Unit - write 2 entities with the same name - should throw an error', t => {
+  const sceneWriter = new SceneWriter()
+  sceneWriter.addEntity('sphere', new Entity())
+  sceneWriter.addComponent('sphere', new SphereShape())
+
+  t.throws(
+    () => sceneWriter.addEntity('sphere', new Entity()),
+    'There is already an entity with name "sphere"'
+  )
+})
