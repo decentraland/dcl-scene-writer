@@ -48,5 +48,8 @@
     "prettier": "^1.16.2",
     "ts-node": "^8.0.2",
     "tslint": "^5.12.1"
+  },
+  "dependencies": {
+    "decentraland-ecs": "^5.0.0"
   }
 }
