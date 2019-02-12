@@ -1,14 +1,14 @@
 import * as DCL from 'decentraland-ecs'
-const typesMap = require('decentraland-ecs/types/dcl/decentraland-ecs.api')
-
-type Component = {
-  data?: DCL.ObservableComponent
-  entityName?: string
-}
 
 export default class SceneWriter {
+  private DCL: any
+  private map: any
   private entities: Map<string, DCL.Entity> = new Map<string, DCL.Entity>()
-  private components: Component[] = []
+
+  constructor(dcl, map?: any) {
+    this.DCL = dcl
+    this.map = map || require('decentraland-ecs/types/dcl/decentraland-ecs.api')
+  }
 
   addEntity(name: string, entity: DCL.Entity) {
     if (this.entities.has(name)) {
@@ -18,37 +18,45 @@ export default class SceneWriter {
     this.entities.set(name, entity)
   }
 
-  addComponent(entityName: string, component: DCL.ObservableComponent) {
-    this.components.push({ data: component, entityName })
-  }
-
   emitCode(): string {
     let code = ''
     this.entities.forEach((entity, name) => {
-      code += this.writeEntity(name) + '\n'
+      code += this.writeEntity(entity, name) + '\n'
     })
     return code
   }
 
-  private writeEntity(name: string): string {
+  private writeEntity(entity: DCL.Entity, name: string): string {
     let code = ''
     code += `const ${name} = new Entity()\n`
-    this.components
-      .filter(c => c.entityName === name)
-      .forEach(c => {
-        code += `${name}.set(${this.writeComponent(c.data)})\n`
-      })
+
+    const parent = entity.getParent()
+    if (parent) {
+      const parentName = this.getEntityName(parent)
+
+      if (!parentName) {
+        throw new Error(`Parent entity of "${name}" is missing, you should add parents first.`)
+      }
+
+      code += `${name}.setParent(${parentName})\n`
+    }
+
+    for (let key in entity.components) {
+      let c = entity.components[key]
+      code += `${name}.set(${this.writeComponent(c)})\n`
+    }
+
     return code
   }
 
   private writeComponent(component: DCL.ObservableComponent) {
     // Get class name
-    let constructor
-    const typesArray = Object.keys(typesMap.exports).filter(
-      n => typesMap.exports[n].kind === 'class' && n !== 'Shape' && n !== 'ObservableComponent'
+    let constructor: string
+    const typesArray = Object.keys(this.map.exports).filter(
+      n => this.map.exports[n].kind === 'class' && n !== 'Shape' && n !== 'ObservableComponent'
     )
     for (let i = 0; i < typesArray.length; i++) {
-      if (component instanceof DCL[typesArray[i]]) {
+      if (component instanceof this.DCL[typesArray[i]]) {
         constructor = typesArray[i]
       }
     }
@@ -56,6 +64,18 @@ export default class SceneWriter {
     return constructor === 'Transform'
       ? `new Transform(${this.getTransformComponentData(component.data)})`
       : `new ${constructor}(${this.getConstructorValues(constructor, component.data)})`
+  }
+
+  private getEntityName(entity: DCL.Entity) {
+    let entityName: string
+
+    this.entities.forEach((ent, name) => {
+      if (ent === entity) {
+        entityName = name
+      }
+    })
+
+    return entityName
   }
 
   private getConstructorValues(constructor: string, data) {
@@ -76,21 +96,21 @@ export default class SceneWriter {
   }
 
   private getConstructorTypes(name: string) {
-    if (!typesMap.exports[name].members) {
+    if (!this.map.exports[name].members) {
       return null
     }
 
-    return typesMap.exports[name].members.__constructor
+    return this.map.exports[name].members.__constructor
   }
 
   private getTransformComponentData(data): string {
     const props = []
     for (const prop in data) {
-      if (data[prop] instanceof DCL.Vector3) {
+      if (data[prop] instanceof this.DCL.Vector3) {
         props.push(`${prop}: new Vector3(${data[prop].x}, ${data[prop].y}, ${data[prop].z})`)
       }
 
-      if (data[prop] instanceof DCL.Quaternion) {
+      if (data[prop] instanceof this.DCL.Quaternion) {
         props.push(
           `${prop}: new Quaternion(${data[prop].x}, ${data[prop].y}, ${data[prop].z}, ${
             data[prop].w
