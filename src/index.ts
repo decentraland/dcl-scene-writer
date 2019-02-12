@@ -1,20 +1,9 @@
 import * as DCL from 'decentraland-ecs'
 
-type Component = {
-  data?: DCL.ObservableComponent
-  entityName?: string
-}
-
-interface KeyValuePair<K, T> {
-  key: K
-  value: T
-}
-
 export default class SceneWriter {
-  private DCL
-  private map
+  private DCL: any
+  private map: any
   private entities: Map<string, DCL.Entity> = new Map<string, DCL.Entity>()
-  private components: Component[] = []
 
   constructor(dcl, map?: any) {
     this.DCL = dcl
@@ -27,10 +16,6 @@ export default class SceneWriter {
     }
 
     this.entities.set(name, entity)
-  }
-
-  addComponent(entityName: string, component: DCL.ObservableComponent) {
-    this.components.push({ data: component, entityName })
   }
 
   emitCode(): string {
@@ -47,32 +32,26 @@ export default class SceneWriter {
 
     const parent = entity.getParent()
     if (parent) {
-      let parentEntity: KeyValuePair<string, DCL.Entity>
+      const parentName = this.getEntityName(parent)
 
-      this.entities.forEach((ent, name) => {
-        if (ent === parent) {
-          parentEntity = { key: name, value: ent }
-        }
-      })
-
-      if (!parentEntity) {
+      if (!parentName) {
         throw new Error(`Parent entity of "${name}" is missing, you should add parents first.`)
       }
 
-      code += `${name}.setParent(${parentEntity.key})\n`
+      code += `${name}.setParent(${parentName})\n`
     }
 
-    this.components
-      .filter(c => c.entityName === name)
-      .forEach(c => {
-        code += `${name}.set(${this.writeComponent(c.data)})\n`
-      })
+    for (let key in entity.components) {
+      let c = entity.components[key]
+      code += `${name}.set(${this.writeComponent(c)})\n`
+    }
+
     return code
   }
 
   private writeComponent(component: DCL.ObservableComponent) {
     // Get class name
-    let constructor
+    let constructor: string
     const typesArray = Object.keys(this.map.exports).filter(
       n => this.map.exports[n].kind === 'class' && n !== 'Shape' && n !== 'ObservableComponent'
     )
@@ -85,6 +64,18 @@ export default class SceneWriter {
     return constructor === 'Transform'
       ? `new Transform(${this.getTransformComponentData(component.data)})`
       : `new ${constructor}(${this.getConstructorValues(constructor, component.data)})`
+  }
+
+  private getEntityName(entity: DCL.Entity) {
+    let entityName: string
+
+    this.entities.forEach((ent, name) => {
+      if (ent === entity) {
+        entityName = name
+      }
+    })
+
+    return entityName
   }
 
   private getConstructorValues(constructor: string, data) {

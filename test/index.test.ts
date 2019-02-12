@@ -5,15 +5,15 @@ import SceneWriter from '../src'
 
 test('Unit - write entity cube - should output TS of cube', t => {
   const sceneWriter = new SceneWriter(DCL)
-  sceneWriter.addEntity('cube', new DCL.Entity())
-  sceneWriter.addComponent('cube', new DCL.BoxShape())
-  sceneWriter.addComponent(
-    'cube',
+  const cube = new DCL.Entity()
+  cube.set(new DCL.BoxShape())
+  cube.set(
     new DCL.Transform({
       position: new DCL.Vector3(5, 0, 5),
       rotation: new DCL.Quaternion(0, 0, 1, 0)
     })
   )
+  sceneWriter.addEntity('cube', cube)
   const code = sceneWriter.emitCode()
 
   t.is(
@@ -24,12 +24,10 @@ test('Unit - write entity cube - should output TS of cube', t => {
 
 test('Unit - write entity GLTF - should output TS of cube', t => {
   const sceneWriter = new SceneWriter(DCL)
-  sceneWriter.addEntity('skeleton', new DCL.Entity())
-  sceneWriter.addComponent('skeleton', new DCL.GLTFShape('./asd.gltf'))
-  sceneWriter.addComponent(
-    'skeleton',
-    new DCL.Transform({ rotation: new DCL.Quaternion(0, 2, 1, 0) })
-  )
+  const skeleton = new DCL.Entity()
+  skeleton.set(new DCL.GLTFShape('./asd.gltf'))
+  skeleton.set(new DCL.Transform({ rotation: new DCL.Quaternion(0, 2, 1, 0) }))
+  sceneWriter.addEntity('skeleton', skeleton)
   const code = sceneWriter.emitCode()
 
   t.is(
@@ -40,10 +38,12 @@ test('Unit - write entity GLTF - should output TS of cube', t => {
 
 test('Unit - write 2 entities - should output TS of cube', t => {
   const sceneWriter = new SceneWriter(DCL)
-  sceneWriter.addEntity('sphere', new DCL.Entity())
-  sceneWriter.addComponent('sphere', new DCL.SphereShape())
-  sceneWriter.addEntity('cube', new DCL.Entity())
-  sceneWriter.addComponent('cube', new DCL.BoxShape())
+  const sphere = new DCL.Entity()
+  sphere.set(new DCL.SphereShape())
+  sceneWriter.addEntity('sphere', sphere)
+  const cube = new DCL.Entity()
+  cube.set(new DCL.BoxShape())
+  sceneWriter.addEntity('cube', cube)
   const code = sceneWriter.emitCode()
 
   t.is(
@@ -54,8 +54,9 @@ test('Unit - write 2 entities - should output TS of cube', t => {
 
 test('Unit - write 2 entities with the same name - should throw an error', t => {
   const sceneWriter = new SceneWriter(DCL)
-  sceneWriter.addEntity('sphere', new DCL.Entity())
-  sceneWriter.addComponent('sphere', new DCL.SphereShape())
+  const sphere = new DCL.Entity()
+  sphere.set(new DCL.SphereShape())
+  sceneWriter.addEntity('sphere', sphere)
 
   t.throws(
     () => sceneWriter.addEntity('sphere', new DCL.Entity()),
@@ -66,13 +67,13 @@ test('Unit - write 2 entities with the same name - should throw an error', t => 
 test('Unit - write an entity with an existing parent - should throw an error', t => {
   const sceneWriter = new SceneWriter(DCL)
   const sphere = new DCL.Entity()
+  sphere.set(new DCL.SphereShape())
   sceneWriter.addEntity('sphere', sphere)
-  sceneWriter.addComponent('sphere', new DCL.SphereShape())
 
   const cube = new DCL.Entity()
+  cube.set(new DCL.BoxShape())
   cube.setParent(sphere)
   sceneWriter.addEntity('cube', cube)
-  sceneWriter.addComponent('cube', new DCL.BoxShape())
 
   const code = sceneWriter.emitCode()
 
@@ -86,9 +87,9 @@ test('Unit - write an entity with an inexisting parent - should throw an error',
   const sceneWriter = new SceneWriter(DCL)
   const sphere = new DCL.Entity()
   const cube = new DCL.Entity()
+  cube.set(new DCL.BoxShape())
   cube.setParent(sphere)
   sceneWriter.addEntity('cube', cube)
-  sceneWriter.addComponent('cube', new DCL.BoxShape())
 
   t.throws(
     () => sceneWriter.emitCode(),
