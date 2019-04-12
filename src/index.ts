@@ -43,7 +43,7 @@ export default class SceneWriter {
 
     for (let key in entity.components) {
       let c = entity.components[key]
-      code += `${name}.set(${this.writeComponent(c)})\n`
+      code += `${name}.addComponentOrReplace(${this.writeComponent(c)})\n`
     }
 
     return code
