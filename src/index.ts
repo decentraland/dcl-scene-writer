@@ -1,4 +1,10 @@
 import * as DCL from 'decentraland-ecs'
+import { toCamelCase } from './utils'
+
+type ComponentMap = {
+  instanceToName: Map<any, string>
+  takenNames: Set<string>
+}
 
 export default class SceneWriter {
   private DCL: any
@@ -20,15 +26,18 @@ export default class SceneWriter {
 
   emitCode(): string {
     let code = ''
+    const componentMap: ComponentMap = {
+      instanceToName: new Map(),
+      takenNames: new Set()
+    }
     this.entities.forEach((entity, name) => {
-      code += this.writeEntity(entity, name) + '\n'
+      code += this.writeEntity(entity, name, componentMap) + '\n'
     })
-    return code
+    return code.trim()
   }
 
-  private writeEntity(entity: DCL.Entity, name: string): string {
-    let code = ''
-    code += `const ${name} = new Entity()\n`
+  private writeEntity(entity: DCL.Entity, name: string, componentMap: ComponentMap): string {
+    let code = `const ${name} = new Entity()\n`
 
     const parent = entity.getParent()
     if (parent) {
@@ -42,14 +51,31 @@ export default class SceneWriter {
     }
 
     for (let key in entity.components) {
-      let c = entity.components[key]
-      code += `${name}.addComponentOrReplace(${this.writeComponent(c)})\n`
+      const componentInstance = entity.components[key]
+      let componentName = componentMap.instanceToName.get(componentInstance)
+      if (!componentName) {
+        const constructorName = this.getConstructorName(componentInstance)
+        const variableName = toCamelCase(constructorName)
+        let attempt = 1
+        componentName = variableName
+        while (componentMap.takenNames.has(componentName)) {
+          attempt++
+          componentName = `${variableName}_${attempt}`
+        }
+        const componentCode = this.writeComponent(constructorName, componentInstance)
+        componentMap.takenNames.add(componentName)
+        componentMap.instanceToName.set(componentInstance, componentName)
+        code += `const ${componentName} = ${componentCode}\n`
+      }
+      code += `${name}.addComponentOrReplace(${componentName})\n`
     }
+
+    code += `engine.addEntity(${name})\n`
 
     return code
   }
 
-  private writeComponent(component: DCL.ObservableComponent) {
+  private getConstructorName(component: DCL.ObservableComponent) {
     // Get class name
     let constructor: string
     const typesArray = Object.keys(this.map.exports).filter(
@@ -60,10 +86,13 @@ export default class SceneWriter {
         constructor = typesArray[i]
       }
     }
+    return constructor
+  }
 
-    return constructor === 'Transform'
+  private writeComponent(constructorName: string, component: DCL.ObservableComponent) {
+    return constructorName === 'Transform'
       ? `new Transform(${this.getTransformComponentData(component.data)})`
-      : `new ${constructor}(${this.getConstructorValues(constructor, component.data)})`
+      : `new ${constructorName}(${this.getConstructorValues(constructorName, component.data)})`
   }
 
   private getEntityName(entity: DCL.Entity) {
@@ -118,6 +147,6 @@ export default class SceneWriter {
         )
       }
     }
-    return `{ ${props.join(', ')} }`
+    return `{\n  ${props.join(',\n  ')}\n}`
   }
 }

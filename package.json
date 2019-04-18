@@ -10,7 +10,7 @@
   "scripts": {
     "build": "ncc build src/index.ts -o dist --minify",
     "watch": "npm run build -- --watch",
-    "test": "ava",
+    "test": "ava test/**/*.test.ts",
     "precommit": "lint-staged"
   },
   "lint-staged": {
