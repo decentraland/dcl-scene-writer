@@ -2,18 +2,18 @@ import test from 'ava'
 import { isLowerCaseChar, toCamelCase } from '../src/utils'
 
 test('Unit - isLowerCaseChar - should output true for "a"', t => {
-  t.is(isLowerCaseChar('a'), true)
+  t.true(isLowerCaseChar('a'))
 })
 
 test('Unit - isLowerCaseChar - should output false for "A"', t => {
-  t.is(isLowerCaseChar('A'), false)
+  t.false(isLowerCaseChar('A'))
 })
 
 test('Unit - toCamelCase - should output "transform"', t => {
   t.is(toCamelCase('Transform'), 'transform')
 })
 
-test('Unit - toCamelCase - should output "boxShape:', t => {
+test('Unit - toCamelCase - should output "boxShape"', t => {
   t.is(toCamelCase('BoxShape'), 'boxShape')
 })
 
