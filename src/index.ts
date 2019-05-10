@@ -95,7 +95,7 @@ export default class SceneWriter {
       : `new ${constructorName}(${this.getConstructorValues(constructorName, component.data)})`
   }
 
-  private getEntityName(entity: DCL.Entity) {
+  private getEntityName(entity: DCL.IEntity) {
     let entityName: string
 
     this.entities.forEach((ent, name) => {
