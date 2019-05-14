@@ -22,6 +22,12 @@ const transform = new Transform({
 skeleton.addComponentOrReplace(transform)
 engine.addEntity(skeleton)`
 
+export const ntfShape = `
+const kitty = new Entity()
+const nftShape = new NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376')
+kitty.addComponentOrReplace(nftShape)
+engine.addEntity(kitty)`
+
 export const sphereAndBoxSample = `
 const sphere = new Entity()
 const sphereShape = new SphereShape()
