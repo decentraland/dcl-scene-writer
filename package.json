@@ -50,7 +50,7 @@
     "@zeit/ncc": "^0.13.0",
     "ava": "^1.2.1",
     "dcl-tslint-config-standard": "^1.1.0",
-    "decentraland-ecs": "^6.0.2-20190508203545.commit-c108e83",
+    "decentraland-ecs": "^6.0.4",
     "husky": "^1.3.1",
     "lint-staged": "^8.1.1",
     "prettier": "^1.16.2",
@@ -58,7 +58,7 @@
     "tslint": "^5.12.1"
   },
   "peerDependencies": {
-    "decentraland-ecs": "^6.0.2"
+    "decentraland-ecs": "^6.0.4"
   },
   "dependencies": {}
 }

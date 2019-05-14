@@ -8,14 +8,9 @@ import {
   sphereAndBoxSample,
   parentSample,
   reuseComponentSample,
-  multipleComponentsSample
+  multipleComponentsSample,
+  ntfShape
 } from './samples'
-
-declare module 'decentraland-ecs' {
-  export class NFTShape {
-    constructor(path: string)
-  }
-}
 
 function sanitize(sample) {
   return sample.trim()
@@ -57,7 +52,7 @@ test('Should output code for an entity with NFTShape', t => {
   sceneWriter.addEntity('kitty', kitty)
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(gltfSample))
+  t.is(code, sanitize(ntfShape))
 })
 
 test('Should output code for two entities with SphereShape and BoxShape', t => {
