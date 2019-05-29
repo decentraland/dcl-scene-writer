@@ -70,7 +70,9 @@ export default class SceneWriter {
       code += `${name}.addComponentOrReplace(${componentName})\n`
     }
 
-    code += `engine.addEntity(${name})\n`
+    if (!parent) {
+      code += `engine.addEntity(${name})\n`
+    }
 
     return code
   }

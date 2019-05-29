@@ -48,8 +48,7 @@ engine.addEntity(sphere)
 const box = new Entity()
 box.setParent(sphere)
 const boxShape = new BoxShape()
-box.addComponentOrReplace(boxShape)
-engine.addEntity(box)`
+box.addComponentOrReplace(boxShape)`
 
 export const reuseComponentSample = `
 const skeleton1 = new Entity()
