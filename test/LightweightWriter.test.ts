@@ -36,7 +36,9 @@ test('Should output code for an entity with BoxShape and Transfrom', t => {
 test('Should output code for an entity with GLTFShape and Transform', t => {
   const sceneWriter = new LightweightWriter(DCL)
   const skeleton = new DCL.Entity()
-  skeleton.addComponentOrReplace(new DCL.GLTFShape('./Skeleton.gltf'))
+  const skeletonShape = new DCL.GLTFShape('./Skeleton.gltf')
+  skeletonShape.withCollisions = true
+  skeleton.addComponentOrReplace(skeletonShape)
   skeleton.addComponentOrReplace(new DCL.Transform({ rotation: new DCL.Quaternion(0, 2, 1, 0) }))
   sceneWriter.addEntity('skeleton', skeleton)
   const code = sceneWriter.emitCode()
@@ -47,9 +49,9 @@ test('Should output code for an entity with GLTFShape and Transform', t => {
 test('Should output code for an entity with NFTShape', t => {
   const sceneWriter = new LightweightWriter(DCL)
   const kitty = new DCL.Entity()
-  kitty.addComponentOrReplace(
-    new DCL.NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376')
-  )
+  const nftShape = new DCL.NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376')
+  nftShape.withCollisions = true
+  kitty.addComponentOrReplace(nftShape)
   sceneWriter.addEntity('kitty', kitty)
   const code = sceneWriter.emitCode()
 
@@ -59,10 +61,14 @@ test('Should output code for an entity with NFTShape', t => {
 test('Should output code for two entities with SphereShape and BoxShape', t => {
   const sceneWriter = new LightweightWriter(DCL)
   const sphere = new DCL.Entity()
-  sphere.addComponentOrReplace(new DCL.SphereShape())
+  const sphereShape = new DCL.SphereShape()
+  sphereShape.withCollisions = true
+  sphere.addComponentOrReplace(sphereShape)
   sceneWriter.addEntity('sphere', sphere)
   const cube = new DCL.Entity()
-  cube.addComponentOrReplace(new DCL.BoxShape())
+  const boxShape = new DCL.BoxShape()
+  boxShape.withCollisions = true
+  cube.addComponentOrReplace(boxShape)
   sceneWriter.addEntity('box', cube)
   const code = sceneWriter.emitCode()
   t.is(sanitize(code), sanitize(sphereAndBoxSample))
@@ -83,11 +89,15 @@ test('Should throw an error when writing 2 entities with the same name', t => {
 test('Should output code for an entity with a parent', t => {
   const sceneWriter = new LightweightWriter(DCL)
   const sphere = new DCL.Entity()
-  sphere.addComponentOrReplace(new DCL.SphereShape())
+  const sphereShape = new DCL.SphereShape()
+  sphereShape.withCollisions = true
+  sphere.addComponentOrReplace(sphereShape)
   sceneWriter.addEntity('sphere', sphere)
 
   const box = new DCL.Entity()
-  box.addComponentOrReplace(new DCL.BoxShape())
+  const boxShape = new DCL.BoxShape()
+  boxShape.withCollisions = true
+  box.addComponentOrReplace(boxShape)
   box.setParent(sphere)
   sceneWriter.addEntity('box', box)
 
@@ -114,6 +124,7 @@ test('Should output code for two entities that reuse a gltfShape component', t =
   const sceneWriter = new LightweightWriter(DCL)
 
   const gltf = new DCL.GLTFShape('./Skeleton.gltf')
+  gltf.withCollisions = true
   const skeleton1 = new DCL.Entity()
   skeleton1.addComponentOrReplace(gltf)
   const skeleton2 = new DCL.Entity()
@@ -131,14 +142,17 @@ test('Should output code for multiple GLTFShape components with unique names', t
 
   const tree = new DCL.Entity()
   const treeShape = new DCL.GLTFShape('./Tree.gltf')
+  treeShape.withCollisions = true
   tree.addComponentOrReplace(treeShape)
 
   const rock = new DCL.Entity()
   const rockShape = new DCL.GLTFShape('./Rock.gltf')
+  rockShape.withCollisions = true
   rock.addComponentOrReplace(rockShape)
 
   const ground = new DCL.Entity()
   const groundShape = new DCL.GLTFShape('./Ground.gltf')
+  groundShape.withCollisions = true
   ground.addComponentOrReplace(groundShape)
 
   sceneWriter.addEntity('tree', tree)
