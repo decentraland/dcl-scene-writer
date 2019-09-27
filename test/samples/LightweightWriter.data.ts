@@ -30,6 +30,18 @@ dcl.componentUpdated('nftShape', JSON.stringify({"withCollisions":false,"visible
 dcl.attachEntityComponent('kitty', 'engine.shape', 'nftShape');
 `
 
+export const correctTransformName = `
+dcl.subscribe('sceneStart');
+
+dcl.addEntity('entity');
+dcl.setParent('entity', '0');
+dcl.updateEntityComponent('entity', 'engine.transform', 1, JSON.stringify({"position":{"x":0,"y":0,"z":0},"rotation":{"x":0,"y":2,"z":1,"w":0},"scale":{"x":1,"y":1,"z":1}}));
+
+dcl.addEntity('entity2');
+dcl.setParent('entity2', '0');
+dcl.updateEntityComponent('entity2', 'engine.transform', 1, JSON.stringify({"position":{"x":0,"y":0,"z":0},"rotation":{"x":0,"y":2,"z":1,"w":0},"scale":{"x":1,"y":1,"z":1}}));
+`
+
 export const sphereAndBoxSample = `
 dcl.subscribe('sceneStart');
 

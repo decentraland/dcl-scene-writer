@@ -8,7 +8,8 @@ import {
   parentSample,
   reuseComponentSample,
   multipleComponentsSample,
-  ntfShape
+  ntfShape,
+  correctTransformName
 } from './samples/LightweightWriter.data'
 
 import { LightweightWriter } from '../src/LightweightWriter'
@@ -16,6 +17,29 @@ import { LightweightWriter } from '../src/LightweightWriter'
 function sanitize(sample) {
   return sample.trim()
 }
+
+test('Correctly handle transforms', t => {
+  const sceneWriter = new LightweightWriter(DCL)
+  const entity = new DCL.Entity()
+  entity.addComponentOrReplace(
+    new DCL.Transform({
+      position: new DCL.Vector3(0, 0, 0),
+      rotation: new DCL.Quaternion(0, 2, 1, 0)
+    })
+  )
+  sceneWriter.addEntity('entity', entity)
+  const entity2 = new DCL.Entity()
+  entity2.addComponentOrReplace(
+    new DCL.Transform({
+      position: new DCL.Vector3(0, 0, 0),
+      rotation: new DCL.Quaternion(0, 2, 1, 0)
+    })
+  )
+  sceneWriter.addEntity('entity2', entity2)
+  const code = sceneWriter.emitCode()
+
+  t.is(sanitize(code), sanitize(correctTransformName))
+})
 
 test('Should output code for an entity with BoxShape and Transfrom', t => {
   const sceneWriter = new LightweightWriter(DCL)

@@ -28,7 +28,7 @@ export class LightweightWriter extends SceneWriter {
     componentName: string,
     componentCode: string
   ): string {
-    if (componentName === 'transform') {
+    if (DCL.getComponentName(component) === 'engine.transform') {
       return `dcl.updateEntityComponent('${this.getEntityName(
         entity
       )}', 'engine.transform', ${DCL.getComponentClassId(
