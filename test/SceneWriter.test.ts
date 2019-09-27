@@ -10,7 +10,7 @@ import {
   reuseComponentSample,
   multipleComponentsSample,
   ntfShape
-} from './samples'
+} from './samples/SceneWriter.data'
 
 function sanitize(sample) {
   return sample.trim()
