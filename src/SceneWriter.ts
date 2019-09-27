@@ -1,12 +1,8 @@
 import * as DCL from 'decentraland-ecs'
 import { toCamelCase } from './utils'
+import { ComponentMap } from './ComponentMap'
 
-type ComponentMap = {
-  instanceToName: Map<any, string>
-  takenNames: Set<string>
-}
-
-export default class SceneWriter {
+export class SceneWriter {
   private DCL: any
   private map: any
   private entities: Map<string, DCL.Entity> = new Map<string, DCL.Entity>()
@@ -25,21 +21,68 @@ export default class SceneWriter {
   }
 
   emitCode(): string {
-    let code = ''
+    const code = []
+    code.push(this.stepPrologue())
     const componentMap: ComponentMap = {
       instanceToName: new Map(),
       takenNames: new Set()
     }
-    this.entities.forEach((entity, name) => {
-      code += this.writeEntity(entity, name, componentMap) + '\n'
+    this.entities.forEach(entity => {
+      code.push(this.writeEntity(entity, componentMap).trim() + '\n')
     })
-    return code.trim()
+    return code.join('\n')
   }
-
-  private writeEntity(entity: DCL.Entity, name: string, componentMap: ComponentMap): string {
-    let code = `const ${name} = new Entity()\n`
+  protected writeEntity(entity: DCL.Entity, componentMap: ComponentMap): string {
+    const code = []
+    const name = this.getEntityName(entity)
+    code.push(this.stepStartEntity(entity, name))
 
     const parent = entity.getParent()
+    code.push(this.stepSetEntityParent(entity, name, parent))
+
+    const keys = Object.keys(entity.components)
+    for (let key of keys) {
+      const componentInstance = entity.components[key]
+      try {
+        let componentName = componentMap.instanceToName.get(componentInstance)
+        if (!componentName) {
+          const constructorName = this.getConstructorName(componentInstance)
+          const variableName = toCamelCase(constructorName)
+          let attempt = 1
+          componentName = variableName
+          while (componentMap.takenNames.has(componentName)) {
+            attempt++
+            componentName = `${variableName}_${attempt}`
+          }
+          const componentCode = this.writeComponent(constructorName, componentInstance)
+          componentMap.takenNames.add(componentName)
+          componentMap.instanceToName.set(componentInstance, componentName)
+          code.push(
+            this.stepWriteComponentDeclaration(
+              entity,
+              componentInstance,
+              componentName,
+              componentCode
+            )
+          )
+        }
+        code.push(this.stepSetComponentParent(entity, name, componentName, componentInstance))
+      } catch (e) {
+        console.log(e, e.stack)
+      }
+    }
+    return code.join('')
+  }
+
+  protected stepPrologue(): string {
+    return ''
+  }
+
+  protected stepStartEntity(_: DCL.Entity, name: string): string {
+    return `const ${name} = new Entity()\n`
+  }
+
+  protected stepSetEntityParent(_: DCL.Entity, name: string, parent?: DCL.IEntity): string {
     if (parent) {
       const parentName = this.getEntityName(parent)
 
@@ -47,69 +90,55 @@ export default class SceneWriter {
         throw new Error(`Parent entity of "${name}" is missing, you should add parents first.`)
       }
 
-      code += `${name}.setParent(${parentName})\n`
+      return `engine.addEntity(${name})\n${name}.setParent(${parentName})\n`
     }
-
-    for (let key in entity.components) {
-      const componentInstance = entity.components[key]
-      let componentName = componentMap.instanceToName.get(componentInstance)
-      if (!componentName) {
-        const constructorName = this.getConstructorName(componentInstance)
-        const variableName = toCamelCase(constructorName)
-        let attempt = 1
-        componentName = variableName
-        while (componentMap.takenNames.has(componentName)) {
-          attempt++
-          componentName = `${variableName}_${attempt}`
-        }
-        const componentCode = this.writeComponent(constructorName, componentInstance)
-        componentMap.takenNames.add(componentName)
-        componentMap.instanceToName.set(componentInstance, componentName)
-        code += `const ${componentName} = ${componentCode}\n`
-      }
-      code += `${name}.addComponentOrReplace(${componentName})\n`
-    }
-
-    if (!parent) {
-      code += `engine.addEntity(${name})\n`
-    }
-
-    return code
+    return `engine.addEntity(${name})\n`
   }
 
-  private getConstructorName(component: DCL.ObservableComponent) {
-    // Get class name
-    let constructor: string
+  protected stepWriteComponentDeclaration(
+    entity: DCL.Entity,
+    component: DCL.ComponentLike,
+    componentName: string,
+    componentCode: string
+  ): string {
+    return `const ${componentName} = ${componentCode}\n`
+  }
+
+  protected stepSetComponentParent(
+    _: DCL.Entity,
+    entityName: string,
+    componentName: string,
+    component: any
+  ): string {
+    return `${entityName}.addComponentOrReplace(${componentName})\n`
+  }
+
+  protected getConstructorName(component: DCL.ObservableComponent): string | undefined {
     const typesArray = Object.keys(this.map.exports).filter(
       n => this.map.exports[n].kind === 'class' && n !== 'Shape' && n !== 'ObservableComponent'
     )
     for (let i = 0; i < typesArray.length; i++) {
       if (component instanceof this.DCL[typesArray[i]]) {
-        constructor = typesArray[i]
+        return typesArray[i]
       }
     }
-    return constructor
   }
 
-  private writeComponent(constructorName: string, component: DCL.ObservableComponent) {
+  protected writeComponent(constructorName: string, component: DCL.ObservableComponent) {
     return constructorName === 'Transform'
       ? `new Transform(${this.getTransformComponentData(component.data)})`
       : `new ${constructorName}(${this.getConstructorValues(constructorName, component.data)})`
   }
 
-  private getEntityName(entity: DCL.IEntity) {
-    let entityName: string
-
-    this.entities.forEach((ent, name) => {
-      if (ent === entity) {
-        entityName = name
+  protected getEntityName(entity: DCL.IEntity): string {
+    for (let ent of this.entities) {
+      if (ent[1] === entity) {
+        return ent[0]
       }
-    })
-
-    return entityName
+    }
   }
 
-  private getConstructorValues(constructor: string, data) {
+  protected getConstructorValues(constructor: string, data) {
     const types = this.getConstructorTypes(constructor)
 
     if (!types || !types.parameters) {
@@ -126,15 +155,15 @@ export default class SceneWriter {
     return values.join(', ')
   }
 
-  private getConstructorTypes(name: string) {
-    if (!this.map.exports[name].members) {
+  protected getConstructorTypes(name: string) {
+    if (!this.map.exports[name] || !this.map.exports[name].members) {
       return null
     }
 
     return this.map.exports[name].members.__constructor
   }
 
-  private getTransformComponentData(data): string {
+  protected getTransformComponentData(data): string {
     const props = []
     for (const prop in data) {
       if (data[prop] instanceof this.DCL.Vector3) {

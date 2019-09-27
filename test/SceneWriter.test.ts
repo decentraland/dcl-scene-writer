@@ -1,7 +1,7 @@
 import test from 'ava'
 import * as DCL from 'decentraland-ecs'
 
-import SceneWriter from '../src'
+import { SceneWriter } from '../src/SceneWriter'
 import {
   boxSample,
   gltfSample,
@@ -29,7 +29,7 @@ test('Should output code for an entity with BoxShape and Transfrom', t => {
   sceneWriter.addEntity('box', box)
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(boxSample))
+  t.is(sanitize(code), sanitize(boxSample))
 })
 
 test('Should output code for an entity with GLTFShape and Transform', t => {
@@ -40,7 +40,7 @@ test('Should output code for an entity with GLTFShape and Transform', t => {
   sceneWriter.addEntity('skeleton', skeleton)
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(gltfSample))
+  t.is(sanitize(code), sanitize(gltfSample))
 })
 
 test('Should output code for an entity with NFTShape', t => {
@@ -52,7 +52,7 @@ test('Should output code for an entity with NFTShape', t => {
   sceneWriter.addEntity('kitty', kitty)
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(ntfShape))
+  t.is(sanitize(code), sanitize(ntfShape))
 })
 
 test('Should output code for two entities with SphereShape and BoxShape', t => {
@@ -64,7 +64,7 @@ test('Should output code for two entities with SphereShape and BoxShape', t => {
   cube.addComponentOrReplace(new DCL.BoxShape())
   sceneWriter.addEntity('box', cube)
   const code = sceneWriter.emitCode()
-  t.is(code, sanitize(sphereAndBoxSample))
+  t.is(sanitize(code), sanitize(sphereAndBoxSample))
 })
 
 test('Should throw an error when writing 2 entities with the same name', t => {
@@ -92,7 +92,7 @@ test('Should output code for an entity with a parent', t => {
 
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(parentSample))
+  t.is(sanitize(code), sanitize(parentSample))
 })
 
 test('Should throw an error when writing an entity with a non-existent parent', t => {
@@ -122,7 +122,7 @@ test('Should output code for two entities that reuse a gltfShape component', t =
   sceneWriter.addEntity('skeleton2', skeleton2)
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(reuseComponentSample))
+  t.is(sanitize(code), sanitize(reuseComponentSample))
 })
 
 test('Should output code for multiple GLTFShape components with unique names', t => {
@@ -146,5 +146,5 @@ test('Should output code for multiple GLTFShape components with unique names', t
 
   const code = sceneWriter.emitCode()
 
-  t.is(code, sanitize(multipleComponentsSample))
+  t.is(sanitize(code), sanitize(multipleComponentsSample))
 })
