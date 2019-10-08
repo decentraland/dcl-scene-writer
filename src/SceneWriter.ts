@@ -3,9 +3,9 @@ import { toCamelCase } from './utils'
 import { ComponentMap } from './ComponentMap'
 
 export class SceneWriter {
+  protected entities: Map<string, DCL.Entity> = new Map<string, DCL.Entity>()
   private DCL: any
   private map: any
-  private entities: Map<string, DCL.Entity> = new Map<string, DCL.Entity>()
 
   constructor(dcl, map?: any) {
     this.DCL = dcl

@@ -1,4 +1,5 @@
-import { default as SceneWriter } from './SceneWriter'
+import { SceneWriter } from './SceneWriter'
+import { LightweightWriter } from './LightweightWriter'
 
-export { SceneWriter }
+export { SceneWriter, LightweightWriter }
 export default SceneWriter
