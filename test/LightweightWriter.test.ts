@@ -1,7 +1,6 @@
 import test from 'ava'
 import * as DCL from 'decentraland-ecs'
 
-import { SceneWriter } from '../src/SceneWriter'
 import {
   boxSample,
   gltfSample,
@@ -9,15 +8,41 @@ import {
   parentSample,
   reuseComponentSample,
   multipleComponentsSample,
-  ntfShape
-} from './samples/SceneWriter.data'
+  ntfShape,
+  correctTransformName
+} from './samples/LightweightWriter.data'
+
+import { LightweightWriter } from '../src/LightweightWriter'
 
 function sanitize(sample) {
   return sample.trim()
 }
 
+test('Correctly handle transforms', t => {
+  const sceneWriter = new LightweightWriter(DCL)
+  const entity = new DCL.Entity()
+  entity.addComponentOrReplace(
+    new DCL.Transform({
+      position: new DCL.Vector3(0, 0, 0),
+      rotation: new DCL.Quaternion(0, 2, 1, 0)
+    })
+  )
+  sceneWriter.addEntity('entity', entity)
+  const entity2 = new DCL.Entity()
+  entity2.addComponentOrReplace(
+    new DCL.Transform({
+      position: new DCL.Vector3(0, 0, 0),
+      rotation: new DCL.Quaternion(0, 2, 1, 0)
+    })
+  )
+  sceneWriter.addEntity('entity2', entity2)
+  const code = sceneWriter.emitCode()
+
+  t.is(sanitize(code), sanitize(correctTransformName))
+})
+
 test('Should output code for an entity with BoxShape and Transfrom', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const box = new DCL.Entity()
   box.addComponentOrReplace(new DCL.BoxShape())
   box.addComponentOrReplace(
@@ -33,7 +58,7 @@ test('Should output code for an entity with BoxShape and Transfrom', t => {
 })
 
 test('Should output code for an entity with GLTFShape and Transform', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const skeleton = new DCL.Entity()
   skeleton.addComponentOrReplace(new DCL.GLTFShape('./Skeleton.gltf'))
   skeleton.addComponentOrReplace(new DCL.Transform({ rotation: new DCL.Quaternion(0, 2, 1, 0) }))
@@ -44,7 +69,7 @@ test('Should output code for an entity with GLTFShape and Transform', t => {
 })
 
 test('Should output code for an entity with NFTShape', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const kitty = new DCL.Entity()
   kitty.addComponentOrReplace(
     new DCL.NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376')
@@ -56,7 +81,7 @@ test('Should output code for an entity with NFTShape', t => {
 })
 
 test('Should output code for two entities with SphereShape and BoxShape', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const sphere = new DCL.Entity()
   sphere.addComponentOrReplace(new DCL.SphereShape())
   sceneWriter.addEntity('sphere', sphere)
@@ -68,7 +93,7 @@ test('Should output code for two entities with SphereShape and BoxShape', t => {
 })
 
 test('Should throw an error when writing 2 entities with the same name', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const sphere = new DCL.Entity()
   sphere.addComponentOrReplace(new DCL.SphereShape())
   sceneWriter.addEntity('sphere', sphere)
@@ -80,7 +105,7 @@ test('Should throw an error when writing 2 entities with the same name', t => {
 })
 
 test('Should output code for an entity with a parent', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const sphere = new DCL.Entity()
   sphere.addComponentOrReplace(new DCL.SphereShape())
   sceneWriter.addEntity('sphere', sphere)
@@ -96,7 +121,7 @@ test('Should output code for an entity with a parent', t => {
 })
 
 test('Should throw an error when writing an entity with a non-existent parent', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
   const sphere = new DCL.Entity()
   const cube = new DCL.Entity()
   cube.addComponentOrReplace(new DCL.BoxShape())
@@ -110,7 +135,7 @@ test('Should throw an error when writing an entity with a non-existent parent', 
 })
 
 test('Should output code for two entities that reuse a gltfShape component', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
 
   const gltf = new DCL.GLTFShape('./Skeleton.gltf')
   const skeleton1 = new DCL.Entity()
@@ -126,7 +151,7 @@ test('Should output code for two entities that reuse a gltfShape component', t =
 })
 
 test('Should output code for multiple GLTFShape components with unique names', t => {
-  const sceneWriter = new SceneWriter(DCL)
+  const sceneWriter = new LightweightWriter(DCL)
 
   const tree = new DCL.Entity()
   const treeShape = new DCL.GLTFShape('./Tree.gltf')
