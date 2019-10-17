@@ -1,5 +1,5 @@
 import * as DCL from 'decentraland-ecs'
-import { toCamelCase } from './utils'
+import { toCamelCase, blacklist } from './utils'
 import { ComponentMap } from './ComponentMap'
 
 export class SceneWriter {
@@ -54,7 +54,11 @@ export class SceneWriter {
             attempt++
             componentName = `${variableName}_${attempt}`
           }
-          const componentCode = this.writeComponent(constructorName, componentInstance)
+          const componentCode = this.writeComponent(
+            componentName,
+            constructorName,
+            componentInstance
+          )
           componentMap.takenNames.add(componentName)
           componentMap.instanceToName.set(componentInstance, componentName)
           code.push(
@@ -114,20 +118,43 @@ export class SceneWriter {
   }
 
   protected getConstructorName(component: DCL.ObservableComponent): string | undefined {
-    const typesArray = Object.keys(this.map.exports).filter(
-      n => this.map.exports[n].kind === 'class' && n !== 'Shape' && n !== 'ObservableComponent'
-    )
-    for (let i = 0; i < typesArray.length; i++) {
-      if (component instanceof this.DCL[typesArray[i]]) {
-        return typesArray[i]
+    const ecs = this.map.members[0]
+
+    const namesArray = ecs.members
+      .filter(member => member.kind === 'Class' && !blacklist.includes(member.name))
+      .map(member => member.name)
+
+    for (const name of namesArray) {
+      if (component instanceof this.DCL[name]) {
+        return name
       }
     }
   }
 
-  protected writeComponent(constructorName: string, component: DCL.ObservableComponent) {
-    return constructorName === 'Transform'
-      ? `new Transform(${this.getTransformComponentData(component.data)})`
-      : `new ${constructorName}(${this.getConstructorValues(constructorName, component.data)})`
+  protected writeComponent(
+    instanceName: string,
+    constructorName: string,
+    component: DCL.ObservableComponent
+  ) {
+    if (constructorName === 'Transform') {
+      return `new Transform(${this.getTransformComponentData(component.data)})`
+    } else {
+      let code = `new ${constructorName}(${this.getConstructorValues(
+        constructorName,
+        component.data
+      )})`
+
+      const parameters = this.getConstructorParameters(constructorName).reduce(
+        (set, parameter) => set.add(parameter),
+        new Set<string>()
+      )
+      // Write everything on component.data that is not part of the constructor parameters as component attributes
+      const attributes = Object.keys(component.data).filter(key => !parameters.has(key))
+      for (const attribute of attributes) {
+        code += `\n${instanceName}.${attribute} = ${JSON.stringify(component.data[attribute])}`
+      }
+      return code
+    }
   }
 
   protected getEntityName(entity: DCL.IEntity): string {
@@ -139,28 +166,22 @@ export class SceneWriter {
   }
 
   protected getConstructorValues(constructor: string, data) {
-    const types = this.getConstructorTypes(constructor)
-
-    if (!types || !types.parameters) {
+    const parameters = this.getConstructorParameters(constructor)
+    if (!parameters) {
       return ''
     }
-
-    const values = Object.keys(types.parameters).map(p => {
-      if (types.parameters[p].type === 'number') {
-        return data[p]
-      }
-
-      return `'${data[p]}'`
-    })
+    const values = parameters.map(parameter => JSON.stringify(data[parameter]))
     return values.join(', ')
   }
 
-  protected getConstructorTypes(name: string) {
-    if (!this.map.exports[name] || !this.map.exports[name].members) {
-      return null
+  protected getConstructorParameters(name: string): string[] {
+    const ecs = this.map.members[0]
+    const target = ecs.members.find(member => member.name === name)
+    const constructor = target.members.find(member => member.kind === 'Constructor')
+    if (constructor) {
+      return constructor.parameters.map(parameter => parameter.parameterName) as string[]
     }
-
-    return this.map.exports[name].members.__constructor
+    return []
   }
 
   protected getTransformComponentData(data): string {
