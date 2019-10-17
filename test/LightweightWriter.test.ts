@@ -9,7 +9,8 @@ import {
   reuseComponentSample,
   multipleComponentsSample,
   ntfShape,
-  correctTransformName
+  correctTransformName,
+  componentAttributesSample
 } from './samples/LightweightWriter.data'
 
 import { LightweightWriter } from '../src/LightweightWriter'
@@ -72,7 +73,10 @@ test('Should output code for an entity with NFTShape', t => {
   const sceneWriter = new LightweightWriter(DCL)
   const kitty = new DCL.Entity()
   kitty.addComponentOrReplace(
-    new DCL.NFTShape('ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376')
+    new DCL.NFTShape(
+      'ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376',
+      new DCL.Color3(255, 0, 0)
+    )
   )
   sceneWriter.addEntity('kitty', kitty)
   const code = sceneWriter.emitCode()
@@ -172,4 +176,27 @@ test('Should output code for multiple GLTFShape components with unique names', t
   const code = sceneWriter.emitCode()
 
   t.is(sanitize(code), sanitize(multipleComponentsSample))
+})
+
+test('Should output the right value for component attributes that changed after instantiation', t => {
+  const sceneWriter = new LightweightWriter(DCL)
+
+  // Tree with collisions
+  const tree = new DCL.Entity()
+  const treeShape = new DCL.GLTFShape('./Tree.gltf')
+  treeShape.withCollisions = true
+  tree.addComponentOrReplace(treeShape)
+
+  // Rock without collisions
+  const rock = new DCL.Entity()
+  const rockShape = new DCL.GLTFShape('./Rock.gltf')
+  rockShape.withCollisions = false
+  rock.addComponentOrReplace(rockShape)
+
+  sceneWriter.addEntity('tree', tree)
+  sceneWriter.addEntity('rock', rock)
+
+  const code = sceneWriter.emitCode()
+
+  t.is(sanitize(code), sanitize(componentAttributesSample))
 })
