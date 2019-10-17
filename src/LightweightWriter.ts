@@ -80,7 +80,11 @@ export class LightweightWriter extends SceneWriter {
     return ''
   }
 
-  protected writeComponent(constructorName: string, component: DCL.ObservableComponent) {
+  protected writeComponent(
+    instanceName: string,
+    constructorName: string,
+    component: DCL.ObservableComponent
+  ) {
     return ''
   }
 }

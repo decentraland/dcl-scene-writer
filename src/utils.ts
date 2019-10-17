@@ -19,3 +19,7 @@ export function toCamelCase(pascalCase: string) {
   }
   return camelCase
 }
+
+// Blacklist of ECS names
+
+export const blacklist = ['Shape', 'ObservableComponent']
