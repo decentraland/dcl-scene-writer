@@ -99,15 +99,15 @@ dcl.attachEntityComponent('1', 'engine.shape', 'gltfShape');
 
 dcl.addEntity('2');
 dcl.setParent('2', '0');
-dcl.componentCreated('gltfShape_2', 'engine.shape', 54);
-dcl.componentUpdated('gltfShape_2', JSON.stringify({"withCollisions":true,"visible":true,"src":"./Rock.gltf"}));
-dcl.attachEntityComponent('2', 'engine.shape', 'gltfShape_2');
+dcl.componentCreated('gltfShape2', 'engine.shape', 54);
+dcl.componentUpdated('gltfShape2', JSON.stringify({"withCollisions":true,"visible":true,"src":"./Rock.gltf"}));
+dcl.attachEntityComponent('2', 'engine.shape', 'gltfShape2');
 
 dcl.addEntity('3');
 dcl.setParent('3', '0');
-dcl.componentCreated('gltfShape_3', 'engine.shape', 54);
-dcl.componentUpdated('gltfShape_3', JSON.stringify({"withCollisions":true,"visible":true,"src":"./Ground.gltf"}));
-dcl.attachEntityComponent('3', 'engine.shape', 'gltfShape_3');`
+dcl.componentCreated('gltfShape3', 'engine.shape', 54);
+dcl.componentUpdated('gltfShape3', JSON.stringify({"withCollisions":true,"visible":true,"src":"./Ground.gltf"}));
+dcl.attachEntityComponent('3', 'engine.shape', 'gltfShape3');`
 
 export const componentAttributesSample = `
 dcl.subscribe('sceneStart');
@@ -120,7 +120,7 @@ dcl.attachEntityComponent('1', 'engine.shape', 'gltfShape');
 
 dcl.addEntity('2');
 dcl.setParent('2', '0');
-dcl.componentCreated('gltfShape_2', 'engine.shape', 54);
-dcl.componentUpdated('gltfShape_2', JSON.stringify({"withCollisions":false,"visible":true,"src":"./Rock.gltf"}));
-dcl.attachEntityComponent('2', 'engine.shape', 'gltfShape_2');
+dcl.componentCreated('gltfShape2', 'engine.shape', 54);
+dcl.componentUpdated('gltfShape2', JSON.stringify({"withCollisions":false,"visible":true,"src":"./Rock.gltf"}));
+dcl.attachEntityComponent('2', 'engine.shape', 'gltfShape2');
 `

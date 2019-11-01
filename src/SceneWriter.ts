@@ -52,7 +52,7 @@ export class SceneWriter {
           componentName = variableName
           while (componentMap.takenNames.has(componentName)) {
             attempt++
-            componentName = `${variableName}_${attempt}`
+            componentName = `${variableName}${attempt}`
           }
           const componentCode = this.writeComponent(
             componentName,
@@ -83,7 +83,7 @@ export class SceneWriter {
   }
 
   protected stepStartEntity(_: DCL.Entity, name: string): string {
-    return `const ${name} = new Entity()\n`
+    return `const ${name} = new Entity('${name}')\n`
   }
 
   protected stepSetEntityParent(_: DCL.Entity, name: string, parent?: DCL.IEntity): string {
