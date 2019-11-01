@@ -52,7 +52,7 @@ export class SceneWriter {
           componentName = variableName
           while (componentMap.takenNames.has(componentName)) {
             attempt++
-            componentName = `${variableName}_${attempt}`
+            componentName = `${variableName}${attempt}`
           }
           const componentCode = this.writeComponent(
             componentName,

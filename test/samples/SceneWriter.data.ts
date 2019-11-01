@@ -85,17 +85,17 @@ tree.addComponentOrReplace(gltfShape)
 
 const rock = new Entity('rock')
 engine.addEntity(rock)
-const gltfShape_2 = new GLTFShape("./Rock.gltf")
-gltfShape_2.withCollisions = true
-gltfShape_2.visible = true
-rock.addComponentOrReplace(gltfShape_2)
+const gltfShape2 = new GLTFShape("./Rock.gltf")
+gltfShape2.withCollisions = true
+gltfShape2.visible = true
+rock.addComponentOrReplace(gltfShape2)
 
 const ground = new Entity('ground')
 engine.addEntity(ground)
-const gltfShape_3 = new GLTFShape("./Ground.gltf")
-gltfShape_3.withCollisions = true
-gltfShape_3.visible = true
-ground.addComponentOrReplace(gltfShape_3)`
+const gltfShape3 = new GLTFShape("./Ground.gltf")
+gltfShape3.withCollisions = true
+gltfShape3.visible = true
+ground.addComponentOrReplace(gltfShape3)`
 
 export const componentAttributesSample = `
 const tree = new Entity('tree')
@@ -107,8 +107,8 @@ tree.addComponentOrReplace(gltfShape)
 
 const rock = new Entity('rock')
 engine.addEntity(rock)
-const gltfShape_2 = new GLTFShape("./Rock.gltf")
-gltfShape_2.withCollisions = false
-gltfShape_2.visible = true
-rock.addComponentOrReplace(gltfShape_2)
+const gltfShape2 = new GLTFShape("./Rock.gltf")
+gltfShape2.withCollisions = false
+gltfShape2.visible = true
+rock.addComponentOrReplace(gltfShape2)
 `
