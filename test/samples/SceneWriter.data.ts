@@ -27,9 +27,11 @@ skeleton.addComponentOrReplace(transform)`
 export const ntfShape = `
 const kitty = new Entity('kitty')
 engine.addEntity(kitty)
-const nftShape = new NFTShape("ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376", {"r":255,"g":0,"b":0})
+const nftShape = new NFTShape("ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/38376")
 nftShape.withCollisions = true
+nftShape.isPointerBlocker = true
 nftShape.visible = true
+nftShape.color = {"r":255,"g":0,"b":0}
 kitty.addComponentOrReplace(nftShape)`
 
 export const sphereAndBoxSample = `

@@ -44,7 +44,7 @@ test('Should output code for an entity with GLTFShape and Transform', t => {
   t.is(sanitize(code), sanitize(gltfSample))
 })
 
-test('Should output code for an entity with NFTShape', t => {
+test.only('Should output code for an entity with NFTShape', t => {
   const sceneWriter = new SceneWriter(DCL)
   const kitty = new DCL.Entity()
   kitty.addComponentOrReplace(

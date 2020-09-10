@@ -148,8 +148,14 @@ export class SceneWriter {
         (set, parameter) => set.add(parameter),
         new Set<string>()
       )
-      // Write everything on component.data that is not part of the constructor parameters as component attributes
-      const attributes = Object.keys(component.data).filter(key => !parameters.has(key))
+      const readOnlyProperties = this.getReadOnlyProperties(constructorName).reduce(
+        (set, property) => set.add(property),
+        new Set<string>()
+      )
+      // Write everything on component.data that is not part of the constructor parameters and that is not read only as component attributes
+      const attributes = Object.keys(component.data).filter(
+        key => !parameters.has(key) && !readOnlyProperties.has(key)
+      )
       for (const attribute of attributes) {
         code += `\n${instanceName}.${attribute} = ${JSON.stringify(component.data[attribute])}`
       }
@@ -182,6 +188,19 @@ export class SceneWriter {
       return constructor.parameters.map(parameter => parameter.parameterName) as string[]
     }
     return []
+  }
+
+  protected getReadOnlyProperties(name: string): string[] {
+    const ecs = this.map.members[0]
+    const target = ecs.members.find(member => member.name === name)
+    const readOnlyProperties = target.members
+      .filter(
+        member =>
+          member.kind === 'Property' &&
+          member.excerptTokens.some(token => token.text.toLowerCase().includes('readonly'))
+      )
+      .map(member => member.name)
+    return readOnlyProperties
   }
 
   protected getTransformComponentData(data): string {
